@@ -69,51 +69,6 @@
         .quick-option.selected .thumb-bg {
             display: block;
         }
-
-        /* Face ID Scanner Animation */
-        @keyframes scanLine {
-            0% {
-                top: 0;
-                opacity: 0;
-            }
-
-            10% {
-                opacity: 1;
-            }
-
-            90% {
-                opacity: 1;
-            }
-
-            100% {
-                top: 100%;
-                opacity: 0;
-            }
-        }
-
-        @keyframes popIn {
-            0% {
-                transform: scale(0.5);
-                opacity: 0;
-            }
-
-            60% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .scan-animation {
-            animation: scanLine 1.5s ease-in-out infinite;
-        }
-
-        .check-animation {
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
     </style>
 </head>
 
@@ -139,10 +94,11 @@
         </div>
 
         <div class="flex-1 overflow-y-auto pb-32">
-            <!-- Current Balance -->
+            <!-- Current Balance with Canvas -->
             <div class="flex flex-col items-center justify-center pt-2 pb-5">
-                <div class="text-[42px] font-bold tracking-tight mb-2 flex items-baseline">
-                    <span class="text-3xl mr-0.5">$</span><span id="exchange-current-balance">0.00</span>
+                <div class="mb-1 w-full flex justify-center">
+                    <!-- 这里使用Canvas完全接管数字与符号的动画及对齐渲染 -->
+                    <canvas id="balance-canvas"></canvas>
                 </div>
                 <div class="text-[13px] text-gray-500">Mavjud balansni tangalarga ayirboshlash</div>
             </div>
@@ -170,7 +126,7 @@
                         </button>
                     </div>
 
-                    <!-- 内嵌搜索结果卡片 (去除了 absolute 和阴影，加入自然文档流，把下方内容往下推) -->
+                    <!-- 内嵌搜索结果卡片 -->
                     <div id="user-search-result"
                         class="w-full mt-3 bg-white border border-gray-200 rounded-xl hidden overflow-hidden transition-all duration-300">
 
@@ -324,25 +280,41 @@
         </div>
     </div>
 
-    <!-- Face ID Overlay using 1.jpg/gif -->
-    <div id="face-id-modal"
-        class="fixed top-0 left-1/2 -translate-x-1/2 w-[140px] h-[140px] bg-black backdrop-blur-md rounded-[32px] z-[60] flex flex-col items-center justify-center shadow-2xl transition-all duration-200 opacity-0 scale-90 pointer-events-none">
-        <!-- Scanning Image -->
-        <div id="scanner-state" class="relative w-[75px] h-[75px]">
-            <img src="1.gif" class="w-full h-full object-cover rounded-xl" style="mix-blend-mode: screen;"
-                alt="Face ID">
-        </div>
-        <!-- Success Checkmark -->
-        <div id="success-state" class="hidden text-[#4ade80]">
-            <svg class="w-16 h-16 check-animation" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6L9 17l-5-5" />
-            </svg>
+    <!-- Confirmation Modal Overlay -->
+    <div id="confirm-modal-overlay"
+        class="fixed inset-0 bg-black/50 z-[70] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-200">
+        <div class="bg-white w-[75%] max-w-[300px] rounded-xl flex flex-col items-center pt-6 scale-95 transition-transform duration-200"
+            id="confirm-modal-box">
+            <img src="tiktok_coin.png" class="w-12 h-12 mb-3" alt="coin">
+            <div class="px-5 text-center mb-1">
+                <span class="text-[17px] font-semibold text-gray-900 block leading-tight">Fullfør veksling for <span
+                        id="modal-coins">0</span> mynter?</span>
+            </div>
+            <div class="px-5 text-center mb-5 mt-2">
+                <span class="text-[13px] text-gray-500 block leading-tight">$<span id="modal-usd">0.00</span> vil bli
+                    trukket fra estimerte LIVE-belønninger</span>
+            </div>
+            <div class="flex w-full border-t border-gray-200/60 mt-1">
+                <button onclick="closeConfirmModal()"
+                    class="flex-1 py-3.5 text-[16px] text-gray-900 border-r border-gray-200/60 active:bg-gray-50 rounded-bl-xl font-medium">Gå
+                    tilbake</button>
+                <button onclick="confirmAndLoad()"
+                    class="flex-1 py-3.5 text-[16px] text-[#fe2c55] font-semibold active:bg-gray-50 rounded-br-xl">Veksle</button>
+            </div>
         </div>
     </div>
 
-    <!-- Transparent overlay to block clicks during animation -->
-    <div id="animation-blocker" class="fixed inset-0 z-[55] hidden"></div>
+    <!-- Fullscreen Loading Overlay -->
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-white/90 z-[80] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-200">
+        <svg class="animate-spin h-9 w-9 text-[#fe2c55]" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+    </div>
 
 </body>
 
